@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Audio Regularity Task</title>
+
+  <script src="https://unpkg.com/jspsych@7.3.4"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+  <link href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css" rel="stylesheet" />
+
+  <style>
+    body { background: white; color: black; font-family: Arial, Helvetica, sans-serif; }
+    .jspsych-display-element { background: white; }
+    .jspsych-content { max-width: 900px; }
+    .panel { max-width: 720px; margin: 0 auto; text-align: left; }
+    .panel.center { text-align: center; }
+    h1, h2 { text-align: center; }
+    .field { margin: 1.1rem 0; }
+    .field > label { display: block; font-weight: bold; margin-bottom: 0.45rem; }
+    input[type="text"] { width: 100%; max-width: 420px; padding: 0.45rem 0.6rem; border: 1px solid #999; font-size: 1rem; box-sizing: border-box; }
+    .radio-row { display: flex; flex-wrap: wrap; gap: 0.9rem 1.2rem; align-items: center; }
+    .radio-row label { display: inline-flex; gap: 0.35rem; align-items: center; cursor: pointer; font-weight: normal; }
+    .btn-std, .jspsych-btn { margin: 1rem 0.5rem 0; padding: 0.75rem 2.4rem; background: white; color: black; border: 2px solid black; font-size: 1.05rem; font-family: Arial, Helvetica, sans-serif; cursor: pointer; }
+    .btn-std:hover:not(:disabled), .jspsych-btn:hover:not(:disabled) { background: black; color: white; }
+    .btn-std:disabled, .jspsych-btn:disabled { opacity: 0.35; cursor: not-allowed; background: white; color: black; }
+    .error { color: #b00000; min-height: 1.2rem; margin-top: 0.8rem; font-size: 0.9rem; }
+    .stim-wrap { text-align: center; margin: 1.5rem auto; }
+    .status { color: #555; margin-top: 1rem; font-size: 0.95rem; min-height: 1.2rem; }
+    .fixation { font-size: 3rem; text-align: center; margin-top: 25vh; }
+    .slider-area { max-width: 620px; margin: 1.8rem auto 0; text-align: center; opacity: 0.35; }
+    .slider-area.enabled { opacity: 1; }
+    .slider-labels { display: flex; justify-content: space-between; margin-bottom: 0.45rem; font-size: 0.95rem; }
+    input[type="range"] { width: 100%; cursor: pointer; accent-color: black; margin: 0; }
+    input[type="range"].untouched { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px; background: #d0d0d0; outline: none; }
+    input[type="range"].untouched::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 0; height: 0; border: none; }
+    input[type="range"].untouched::-moz-range-thumb { width: 0; height: 0; border: none; }
+    .slider-value { min-height: 1.2rem; margin-top: 0.4rem; color: #444; }
+    .key-hint { margin-top: 0.7rem; color: #555; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+<script>
+const EXPERIMENT_ID = "SzSEPPRmn2DB";
+const PROLIFIC_COMPLETION_URL = "https://app.prolific.com/submissions/complete?cc=CYBYKHOK";
+const STIM_START = 33;
+const STIM_END = 113;
+const EXCLUDED_STIMS = [73];
+const AUDIO_SUFFIX = "_0";
+const AUDIO_EXTENSION = ".wav";
+const ITI_MS = 800;
+const experiment_start = Date.now();
+
+const jsPsych = initJsPsych({
+  show_progress_bar: true,
+  auto_update_progress_bar: true,
+  message_progress_bar: "",
+  on_finish: () => {
+    if (PROLIFIC_COMPLETION_URL) {
+      window.location.href = PROLIFIC_COMPLETION_URL;
+    } else {
+      document.body.innerHTML = `<main style="text-align:center;margin-top:20vh;font-family:Arial,sans-serif"><h2>Thank you, the experiment is complete.</h2><p>You can close this page.</p></main>`;
+    }
+  }
+});
+
+const subject_id = jsPsych.randomization.randomID(10);
+const filename = `${subject_id}.csv`;
+
+const main_stimuli = Array.from({ length: STIM_END - STIM_START + 1 }, (_, i) => STIM_START + i)
+  .filter(n => !EXCLUDED_STIMS.includes(n))
+  .map(n => ({
+    trial_category: "regularity_rating",
+    task_modality: "audio",
+    is_catch: false,
+    stim_id: `stim${n}`,
+    stim_number: n,
+    stim_file: `stim${n}${AUDIO_SUFFIX}${AUDIO_EXTENSION}`,
+    correct_response: ""
+  }));
+
+const catch_stimuli = [
+  {
+    trial_category: "catch_digit",
+    task_modality: "audio",
+    is_catch: true,
+    stim_id: "catch_2",
+    stim_number: 2,
+    stim_file: "catch_2.wav",
+    choices: ["2", "7"],
+    correct_response: "2"
+  },
+  {
+    trial_category: "catch_digit",
+    task_modality: "audio",
+    is_catch: true,
+    stim_id: "catch_7",
+    stim_number: 7,
+    stim_file: "catch_7.wav",
+    choices: ["7", "3"],
+    correct_response: "7"
+  }
+];
+
+const familiarization_stimuli = [
+  { trial_category: "familiarization", task_modality: "audio", is_catch: false, stim_id: "stim23", stim_number: 23, stim_file: "stim23_0.wav", correct_response: "" },
+  { trial_category: "familiarization", task_modality: "audio", is_catch: false, stim_id: "stim30", stim_number: 30, stim_file: "stim30_0.wav", correct_response: "" }
+];
+
+const stimuli = jsPsych.randomization.shuffle([...main_stimuli, ...catch_stimuli])
+  .map((s, i) => ({ ...s, presentation_order: i + 1 }));
+
+jsPsych.data.addProperties({
+  subject_id,
+  experiment_id: EXPERIMENT_ID,
+  task_modality: "audio",
+  experiment_start_iso: new Date(experiment_start).toISOString(),
+  user_agent: navigator.userAgent,
+  browser_language: navigator.language,
+  screen_width: screen.width,
+  screen_height: screen.height
+});
+
+function elapsedMs() { return Date.now() - experiment_start; }
+function getRadioValue(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ""; }
+function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c])); }
+function updateSliderFill(slider) {
+  if (slider.classList.contains("untouched")) return;
+  const pct = ((Number(slider.value) - Number(slider.min)) / (Number(slider.max) - Number(slider.min))) * 100;
+  slider.style.background = `linear-gradient(to right, black 0%, black ${pct}%, #d0d0d0 ${pct}%, #d0d0d0 100%)`;
+}
+
+const timeline = [];
+
+timeline.push({
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div class="panel">
+      <h2>Participant information</h2>
+      <div class="field"><label>Gender</label><div class="radio-row">
+        <label><input type="radio" name="gender" value="female"> female</label>
+        <label><input type="radio" name="gender" value="male"> male</label>
+        <label><input type="radio" name="gender" value="non-binary"> non-binary</label>
+        <label><input type="radio" name="gender" value="prefer not to say"> prefer not to say</label>
+      </div></div>
+      <div class="field"><label for="age">Age (enter a number)</label><input type="text" id="age" autocomplete="off" inputmode="numeric"></div>
+      <div class="field"><label for="prolific_id">What is your Prolific ID?</label><input type="text" id="prolific_id" autocomplete="off"></div>
+      <div class="field"><label>What is your connection to music?</label><div class="radio-row">
+        <label><input type="radio" name="music_connection" value="musician"> musician</label>
+        <label><input type="radio" name="music_connection" value="audio professional"> audio professional</label>
+        <label><input type="radio" name="music_connection" value="neither"> neither</label>
+      </div></div>
+      <div class="field"><label>Which hand do you use?</label><div class="radio-row">
+        <label><input type="radio" name="handedness" value="right"> right</label>
+        <label><input type="radio" name="handedness" value="left"> left</label>
+      </div></div>
+      <div class="field"><label>Do you have headphones?</label><div class="radio-row">
+        <label><input type="radio" name="headphones" value="yes"> yes</label>
+        <label><input type="radio" name="headphones" value="no"> no</label>
+      </div></div>
+      <div id="demo-error" class="error"></div>
+    </div>`,
+  choices: ["NEXT"],
+  button_html: '<button class="jspsych-btn btn-std">%choice%</button>',
+  on_load: () => {
+    const btn = document.querySelector(".jspsych-btn");
+    btn.addEventListener("click", (event) => {
+      event.stopImmediatePropagation();
+      const participant = {
+        gender: getRadioValue("gender"),
+        age: document.getElementById("age").value.trim(),
+        prolific_id: document.getElementById("prolific_id").value.trim(),
+        music_connection: getRadioValue("music_connection"),
+        handedness: getRadioValue("handedness"),
+        headphones: getRadioValue("headphones")
+      };
+      if (Object.values(participant).some(v => !v)) { document.getElementById("demo-error").textContent = "Please complete all required fields."; return; }
+      if (!/^\d+$/.test(participant.age)) { document.getElementById("demo-error").textContent = "Please enter age as a number."; return; }
+      jsPsych.data.addProperties(participant);
+      jsPsych.finishTrial({ trial_kind: "participant_info", timestamp_ms: elapsedMs(), ...participant });
+    }, true);
+  }
+});
+
+timeline.push({
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div class="panel center">
+      <h2>Audio Regularity Rating Task</h2>
+      <p>You will hear the sound of a person drawing a shape on a table. Imagine the shape, then judge how regular it is on a continuous scale from <strong>0</strong> to <strong>100</strong>.</p>
+      <p><strong>0</strong> means very irregular and <strong>100</strong> means very regular.</p>
+      <p>Please use headphones during the experiment.</p>
+      <p>You can track your progress using the progress bar at the top of the screen.</p>
+    </div>`,
+  choices: ["START"],
+  button_html: '<button class="jspsych-btn btn-std">%choice%</button>',
+  data: { trial_kind: "instructions" }
+});
+
+function addFixation(stim) {
+  timeline.push({ type: jsPsychHtmlKeyboardResponse, stimulus: '<div class="fixation">+</div>', choices: "NO_KEYS", trial_duration: 500, data: { trial_kind: "fixation", trial_category: stim.trial_category, is_catch: stim.is_catch, stim_id: stim.stim_id, stim_file: stim.stim_file, presentation_order: stim.presentation_order } });
+}
+
+function playAudioThen(onEnded) {
+  const audio = document.getElementById("trial-audio");
+  const status = document.getElementById("audio-status");
+  audio.addEventListener("ended", () => { status.textContent = "Now respond."; onEnded(audio); });
+  audio.addEventListener("play", () => { status.textContent = "Playing..."; });
+  audio.play().catch(() => {
+    status.innerHTML = 'Automatic playback was blocked. <button type="button" id="manual-play" class="btn-std">PLAY SOUND</button>';
+    document.getElementById("manual-play").addEventListener("click", () => { status.textContent = "Playing..."; audio.play(); });
+  });
+  return audio;
+}
+
+function addRegularityTrial(stim) {
+  addFixation(stim);
+  timeline.push({
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+      <div class="stim-wrap">
+        <h2>Listen</h2>
+        <p>The sound will play automatically.</p>
+        <div id="audio-status" class="status">Loading sound...</div>
+        <audio id="trial-audio" preload="auto" src="${escapeHtml(stim.stim_file)}"></audio>
+        <div id="slider-area" class="slider-area">
+          <h2>How regular is the corresponding shape?</h2>
+          <div class="slider-labels"><span>Very irregular<br>0</span><span>Very regular<br>100</span></div>
+          <input type="range" id="regularity-slider" class="untouched" min="0" max="100" step="1" value="50" disabled>
+          <div id="regularity-value" class="slider-value"></div>
+        </div>
+      </div>`,
+    choices: ["NEXT"],
+    button_html: '<button class="jspsych-btn btn-std" disabled>%choice%</button>',
+    data: { trial_kind: "response", trial_category: stim.trial_category, task_modality: stim.task_modality, is_catch: false, stim_id: stim.stim_id, stim_number: stim.stim_number, stim_file: stim.stim_file, presentation_order: stim.presentation_order },
+    on_load: () => {
+      const start = performance.now();
+      const slider = document.getElementById("regularity-slider");
+      const valueBox = document.getElementById("regularity-value");
+      const btn = document.querySelector(".jspsych-btn");
+      const sliderArea = document.getElementById("slider-area");
+      let audio = playAudioThen(() => { slider.disabled = false; sliderArea.classList.add("enabled"); });
+      function markTouched() {
+        if (slider.disabled) return;
+        slider.classList.remove("untouched");
+        updateSliderFill(slider);
+        valueBox.textContent = slider.value;
+        btn.disabled = false;
+      }
+      slider.addEventListener("pointerdown", markTouched);
+      slider.addEventListener("input", markTouched);
+      btn.addEventListener("click", (event) => {
+        event.stopImmediatePropagation();
+        if (slider.classList.contains("untouched")) return;
+        if (audio) { audio.pause(); audio.removeAttribute("src"); audio.load(); }
+        jsPsych.finishTrial({ regularity_rating: Number(slider.value), response: Number(slider.value), rt: Math.round(performance.now() - start), timestamp_ms: elapsedMs() });
+      }, true);
+    }
+  });
+  timeline.push({ type: jsPsychHtmlKeyboardResponse, stimulus: "", choices: "NO_KEYS", trial_duration: ITI_MS, data: { trial_kind: "iti", trial_category: stim.trial_category, is_catch: false, stim_id: stim.stim_id, stim_file: stim.stim_file, presentation_order: stim.presentation_order } });
+}
+
+function addCatchTrial(stim) {
+  addFixation(stim);
+  const choices = stim.choices;
+  const leftChoice = choices[0];
+  const rightChoice = choices[1];
+  timeline.push({
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+      <div class="stim-wrap">
+        <h2>Listen</h2>
+        <p>The sound will play automatically.</p>
+        <div id="audio-status" class="status">Loading sound...</div>
+        <audio id="trial-audio" preload="auto" src="${escapeHtml(stim.stim_file)}"></audio>
+        <div class="key-hint">Left arrow = ${leftChoice} &nbsp;&nbsp;|&nbsp;&nbsp; Right arrow = ${rightChoice}</div>
+      </div>`,
+    choices,
+    button_html: '<button class="jspsych-btn btn-std" disabled>%choice%</button>',
+    data: { trial_kind: "response", trial_category: stim.trial_category, task_modality: stim.task_modality, is_catch: true, stim_id: stim.stim_id, stim_number: stim.stim_number, stim_file: stim.stim_file, presentation_order: stim.presentation_order, left_choice: leftChoice, right_choice: rightChoice, correct_response: stim.correct_response },
+    on_load: () => {
+      const start = performance.now();
+      const buttons = document.querySelectorAll(".jspsych-btn");
+      let responseEnabled = false;
+      let audio = playAudioThen(() => { responseEnabled = true; buttons.forEach(b => b.disabled = false); });
+      function finish(response, source) {
+        if (!responseEnabled) return;
+        document.removeEventListener("keydown", keyHandler);
+        if (audio) { audio.pause(); audio.removeAttribute("src"); audio.load(); }
+        jsPsych.finishTrial({ response, response_code: response === leftChoice ? 1 : 2, response_source: source, rt: Math.round(performance.now() - start), timestamp_ms: elapsedMs(), catch_correct: response === stim.correct_response });
+      }
+      function keyHandler(e) { if (e.key === "ArrowLeft") { e.preventDefault(); finish(leftChoice, "keyboard_left"); } else if (e.key === "ArrowRight") { e.preventDefault(); finish(rightChoice, "keyboard_right"); } }
+      document.addEventListener("keydown", keyHandler);
+      buttons[0].addEventListener("click", e => { e.stopImmediatePropagation(); finish(leftChoice, "mouse"); }, true);
+      buttons[1].addEventListener("click", e => { e.stopImmediatePropagation(); finish(rightChoice, "mouse"); }, true);
+    }
+  });
+  timeline.push({ type: jsPsychHtmlKeyboardResponse, stimulus: "", choices: "NO_KEYS", trial_duration: ITI_MS, data: { trial_kind: "iti", trial_category: stim.trial_category, is_catch: true, stim_id: stim.stim_id, stim_file: stim.stim_file, presentation_order: stim.presentation_order } });
+}
+
+function addTrial(stim) { stim.is_catch ? addCatchTrial(stim) : addRegularityTrial(stim); }
+
+timeline.push({ type: jsPsychHtmlButtonResponse, stimulus: `<div class="panel center"><h2>Practice trials</h2><p>You will first complete two practice trials.</p></div>`, choices: ["START"], button_html: '<button class="jspsych-btn btn-std">%choice%</button>' });
+familiarization_stimuli.forEach(addRegularityTrial);
+timeline.push({ type: jsPsychHtmlButtonResponse, stimulus: `<div class="panel center"><h2>The experiment will now begin</h2><p>The practice trials are complete.</p><p>You can now start the main experiment.</p></div>`, choices: ["START EXPERIMENT"], button_html: '<button class="jspsych-btn btn-std">%choice%</button>' });
+stimuli.forEach(addTrial);
+
+timeline.push({ type: jsPsychHtmlKeyboardResponse, stimulus: `<p style="text-align:center">Saving your responses...</p>`, choices: "NO_KEYS", trial_duration: 800, data: { trial_kind: "saving_message" } });
+timeline.push({ type: jsPsychPipe, action: "save", experiment_id: EXPERIMENT_ID, filename, data_string: () => jsPsych.data.get().csv() });
+
+jsPsych.run(timeline);
+</script>
+</body>
+</html>
