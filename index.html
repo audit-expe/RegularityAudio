@@ -80,6 +80,27 @@ const main_stimuli = Array.from({ length: STIM_END - STIM_START + 1 }, (_, i) =>
     correct_response: ""
   }));
 
+// Preload all audio stimuli
+main_stimuli.forEach(stim => {
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.src = stim.stim_file;
+});
+
+// Preload familiarization stimuli
+["stim23_0.wav", "stim30_0.wav"].forEach(file => {
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.src = file;
+});
+
+// Preload catch stimuli
+["catch_2.wav", "catch_7.wav"].forEach(file => {
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.src = file;
+});
+
 const catch_stimuli = [
   {
     trial_category: "catch_digit",
@@ -245,7 +266,6 @@ function addRegularityTrial(stim) {
         if (slider.disabled) return;
         slider.classList.remove("untouched");
         updateSliderFill(slider);
-        valueBox.textContent = slider.value;
         btn.disabled = false;
       }
       slider.addEventListener("pointerdown", markTouched);
